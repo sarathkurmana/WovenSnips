@@ -28,7 +28,7 @@ jobs:
     
     - name: Build with PyInstaller
       run: |
-        pyinstaller --clean -y WovenSnips.spec
+        pyinstaller --clean -y --windowed --add-data "fonts/Roboto-Regular.ttf:fonts" --add-data "WovenSnips.icns:." --icon=WovenSnips.icns WovenSnips.py
     
     - name: Create DMG
       run: |
