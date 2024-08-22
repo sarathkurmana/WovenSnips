@@ -59,7 +59,7 @@ from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain_huggingface import HuggingFaceEmbeddings
 
 from PySide6.QtCore import (Qt, Signal, QTimer, QRectF)
-from PySide6.QtGui import (QIcon, QFont, QColor, QPalette, QPainter, QPainterPath, QFontDatabase, QPen, QAction)
+from PySide6.QtGui import (QIcon, QFont, QColor, QPalette, QPainter, QPainterPath, QFontDatabase, QPen, QAction, QGuiApplication)
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QFileDialog, QDialog, QComboBox, QMessageBox, QInputDialog, QScrollArea, QMenu, QDialogButtonBox, QTextBrowser)
 
 LIGHT_THEME = {
@@ -677,8 +677,10 @@ class WovenSnipsGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("WovenSnips")
-        icon_path = os.path.join(os.path.dirname(__file__), "WovenSnips.ico")
+        icon_path = os.path.join(os.path.dirname(__file__), "WovenSnips.icns")
         self.setWindowIcon(QIcon(icon_path))
+        if hasattr(QGuiApplication, 'setWindowIcon'):
+            QGuiApplication.setWindowIcon(QIcon(icon_path))
         self.resize(400, 600)
         self.current_theme = LIGHT_THEME
         self.available_models = []
@@ -692,6 +694,7 @@ class WovenSnipsGUI(QMainWindow):
         self.load_settings()
         self.apply_theme(self.current_theme)
         self.set_roboto_font()
+        self.adjust_for_mac()
         self.update_models()
         self.update_server_status_indicator()
         self.clear_session_signal.connect(self.clear_session_gui)
@@ -1216,7 +1219,7 @@ class WovenSnipsGUI(QMainWindow):
             QMessageBox.warning(self, "Warning", "Please load a corpus or vector store.")
 
     def set_roboto_font(self):
-        font = QFont("Roboto", 9)
+        font = QFont("Roboto", 12)
         self.setFont(font)
         for child in self.findChildren(QWidget):
             child.setFont(font)
@@ -1486,8 +1489,9 @@ class WovenSnipsGUI(QMainWindow):
         self.save_settings()
 
     def load_settings(self):
-        if os.path.exists('settings.json'):
-            with open('settings.json', 'r') as f:
+        settings_path = os.path.expanduser('~/Library/Application Support/WovenSnips/settings.json')
+        if os.path.exists(settings_path):
+            with open(settings_path, 'r') as f:
                 settings = json.load(f)
             self.api_key = settings.get('api_key', '')
             self.model = settings.get('model', '')
@@ -1545,6 +1549,7 @@ class WovenSnipsGUI(QMainWindow):
                 return False
         return False
 
+
     def save_settings(self):
         settings = {
             'api_key': self.api_key,
@@ -1552,16 +1557,36 @@ class WovenSnipsGUI(QMainWindow):
             'dark_theme': self.current_theme == DARK_THEME,
             'local_server': self.local_server.is_running()
         }
-        with open('settings.json', 'w') as f:
+        settings_dir = os.path.expanduser('~/Library/Application Support/WovenSnips')
+        os.makedirs(settings_dir, exist_ok=True)
+        settings_path = os.path.join(settings_dir, 'settings.json')
+        with open(settings_path, 'w') as f:
             json.dump(settings, f)
     
+    def adjust_for_mac(self):
+        if sys.platform == 'darwin':
+            self.setUnifiedTitleAndToolBarOnMac(True)
+            self.setAttribute(Qt.WA_TranslucentBackground)
+            self.setStyleSheet("""
+                QMainWindow {
+                    background-color: rgba(255, 255, 255, 220);
+                }
+            """)
+
+
 def main():
     app = QApplication(sys.argv)
-    font_path = os.path.join(os.path.dirname(__file__), "fonts", "Roboto-Regular.ttf")
+    app.setApplicationName("WovenSnips")
+    
+    if sys.platform == 'darwin':  # Check if running on Mac
+        font_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts", "Roboto-Regular.ttf")
+    else:
+        font_path = os.path.join(os.path.dirname(__file__), "fonts", "Roboto-Regular.ttf")
+    
     font_id = QFontDatabase.addApplicationFont(font_path)
     if font_id != -1:
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
-        app.setFont(QFont(font_family, 9))
+        app.setFont(QFont(font_family, 12))  # Increased font size to 12
     else:
         print("Error: Failed to load Roboto font. Using system default.")
     
