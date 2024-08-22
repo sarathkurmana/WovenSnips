@@ -16,7 +16,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.11'
+        python-version: '3.9'
     
     - name: Install dependencies
       run: |
@@ -25,7 +25,7 @@ jobs:
     
     - name: Build with PyInstaller
       run: |
-        pyinstaller WovenSnips.spec
+        python -m PyInstaller --clean --target-architecture universal2 WovenSnips.spec
     
     - name: Create DMG
       run: |
