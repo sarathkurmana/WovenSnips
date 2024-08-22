@@ -16,7 +16,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.11'
+        python-version: '3.11.9'
     
     - name: Install dependencies
       run: |
@@ -24,8 +24,10 @@ jobs:
         pip install -r requirements.txt
     
     - name: Build with PyInstaller
+      env:
+        ARCHFLAGS: "-arch x86_64"
       run: |
-        pyinstaller WovenSnips.spec
+        pyinstaller --clean -y WovenSnips.spec
     
     - name: Create DMG
       run: |
@@ -34,5 +36,5 @@ jobs:
     - name: Upload DMG
       uses: actions/upload-artifact@v2
       with:
-        name: WovenSnips
+        name: WovenSnips-Intel
         path: WovenSnips.dmg
