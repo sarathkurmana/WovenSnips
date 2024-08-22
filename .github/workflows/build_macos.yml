@@ -28,7 +28,7 @@ jobs:
     
     - name: Build with PyInstaller
       run: |
-        pyinstaller --clean -y --target-architecture x86_64 WovenSnips.spec
+        pyinstaller --clean -y WovenSnips.spec
     
     - name: Create DMG
       run: |
