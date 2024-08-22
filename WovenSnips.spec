@@ -32,7 +32,7 @@ exe = EXE(
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
-    target_arch='universal2',
+    target_arch='x86_64',
     codesign_identity=None,
     entitlements_file=None,
     icon='WovenSnips.icns',
@@ -51,7 +51,7 @@ app = BUNDLE(
     coll,
     name='WovenSnips.app',
     icon='WovenSnips.icns',
-    bundle_identifier='com.yourcompany.wovensnips',
+    bundle_identifier='in.jaisal.wovensnips',
     info_plist={
         'NSHighResolutionCapable': 'True',
         'LSApplicationCategoryType': 'public.app-category.productivity',
